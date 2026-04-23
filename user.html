@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>たまルン 提示画面</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --orange: #f0a500;
+    --dark-orange: #d4910a;
+    --black: #1a1a1a;
+    --bg: #fdf6e3;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    background: linear-gradient(135deg, var(--orange), var(--dark-orange));
+    color: white;
+    width: 100%;
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(240,165,0,0.4);
+  }
+  header h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.05em; }
+
+  .main { 
+    flex: 1; 
+    width: 100%; 
+    max-width: 400px;
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 30px 20px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    text-align: center;
+    border: 2px solid #e8e0d0;
+  }
+
+  .instruction {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 20px;
+  }
+
+  #qrcode {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 10px;
+    background: white;
+    border-radius: 10px;
+  }
+  
+  #qrcode img {
+    margin: 0 auto;
+  }
+
+  .id-display {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    font-family: monospace;
+    color: var(--dark-orange);
+    margin-top: 10px;
+    background: rgba(240,165,0,0.1);
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .input-area {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  input[type=text] {
+    width: 100%;
+    border: 2px solid #ddd; 
+    border-radius: 8px;
+    padding: 12px; 
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type=text]:focus { border-color: var(--orange); }
+
+  .btn {
+    width: 100%;
+    padding: 14px; 
+    border-radius: 10px;
+    border: none; 
+    font-size: 1rem; 
+    font-weight: 700;
+    cursor: pointer; 
+    background: linear-gradient(135deg, var(--orange), var(--dark-orange));
+    color: white; 
+    box-shadow: 0 3px 10px rgba(240,165,0,0.4);
+    transition: all 0.15s;
+  }
+  .btn:active { transform: scale(0.97); }
+
+</style>
+</head>
+<body>
+<header>
+  <h1>たまルン 提示画面</h1>
+</header>
+
+<div class="main">
+  <div class="card">
+    <div class="instruction">食堂でこのQRコードを<br>提示してください</div>
+    
+    <div id="qrcode"></div>
+    <div class="id-display" id="displayId">---</div>
+
+    <div class="input-area" id="inputArea">
+      <input type="text" id="userIdInput" placeholder="あなたのIDを入力" inputmode="numeric">
+      <button class="btn" onclick="generateQR()">QRコードを生成</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let qrcode = null;
+
+function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
+
+function generateQR(id) {
+  const userId = id || document.getElementById('userIdInput').value.trim();
+  if (!userId) {
+    alert('IDを入力してください');
+    return;
+  }
+
+  document.getElementById('displayId').innerText = userId;
+  document.getElementById('qrcode').innerHTML = ''; // Clear prev
+
+  qrcode = new QRCode(document.getElementById("qrcode"), {
+    text: userId,
+    width: 200,
+    height: 200,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+
+  // URLにIDを保存して再読み込み時も維持する処理（必要に応じて）
+  // history.replaceState(null, null, '?page=user&id=' + userId);
+}
+
+// ページ読み込み時にURLパラメータにIDがあれば自動生成
+window.onload = function() {
+  const urlId = getUrlParameter('id');
+  if (urlId) {
+    document.getElementById('userIdInput').value = urlId;
+    generateQR(urlId);
+    document.getElementById('inputArea').style.display = 'none'; // 自動生成時は入力欄を隠すかはお好みで
+  }
+};
+</script>
+<script src="config.js"></script>
+</body>
+</html>

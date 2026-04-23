@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>たまルン 管理画面</title>
+<style>
+  :root {
+    --orange: #f0a500;
+    --dark-orange: #d4910a;
+    --black: #1a1a1a;
+    --white: #ffffff;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --yellow: #f39c12;
+    --bg: #fdf6e3;
+    --card: #ffffff;
+    --border: #e8e0d0;
+    --shadow: 0 4px 20px rgba(0,0,0,0.10);
+    --sidebar-w: 240px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Hiragino Sans','Meiryo',sans-serif; background:var(--bg); color:var(--black); }
+
+  /* ========= HEADER ========= */
+  .topbar {
+    background: linear-gradient(135deg, var(--orange), var(--dark-orange));
+    color: white; padding: 0 24px;
+    height: 56px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top:0; z-index:200;
+    box-shadow: 0 2px 12px rgba(240,165,0,0.4);
+  }
+  .topbar-left { display:flex; align-items:center; gap:12px; }
+  .topbar h1 { font-size:1.1rem; font-weight:800; }
+  .topbar .refresh-btn {
+    background: rgba(255,255,255,0.25); border:none; color:white;
+    width:34px; height:34px; border-radius:50%; cursor:pointer;
+    font-size:1rem; transition:all 0.2s;
+  }
+  .topbar .refresh-btn:hover { background:rgba(255,255,255,0.4); transform:rotate(30deg); }
+  .topbar-right { font-size:0.78rem; opacity:0.9; }
+  .live-dot { width:8px; height:8px; border-radius:50%; background:#4ade80; display:inline-block; margin-right:5px; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ========= LAYOUT ========= */
+  .layout { display:flex; min-height:calc(100vh - 56px); }
+  .sidebar {
+    width: var(--sidebar-w); background:var(--card);
+    border-right:2px solid var(--border); padding:20px 0;
+    position:sticky; top:56px; height:calc(100vh - 56px);
+    overflow-y:auto; flex-shrink:0;
+  }
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding: 12px 20px; cursor:pointer;
+    font-size:0.88rem; font-weight:600; color:#666;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background:#fdf6e3; color:var(--dark-orange); }
+  .nav-item.active { color:var(--dark-orange); border-left-color:var(--orange); background:#fdf6e3; }
+  .nav-icon { font-size:1.1rem; }
+  .nav-badge {
+    margin-left:auto; background:var(--orange); color:white;
+    font-size:0.68rem; font-weight:800;
+    padding:2px 7px; border-radius:10px;
+  }
+  .nav-section {
+    font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em;
+    color:#bbb; font-weight:700; padding:14px 20px 6px;
+  }
+
+  .content { flex:1; padding:24px; overflow-x:hidden; }
+
+  /* ========= CARDS ========= */
+  .section { display:none; }
+  .section.active { display:block; }
+  .page-title { font-size:1.4rem; font-weight:800; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+
+  .stats-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px; margin-bottom:24px; }
+  .stat-card {
+    background:var(--card); border-radius:14px; padding:18px;
+    box-shadow:var(--shadow); border:1.5px solid var(--border);
+  }
+  .stat-label { font-size:0.72rem; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+  .stat-value { font-size:2rem; font-weight:900; line-height:1; }
+  .stat-value.orange { color:var(--orange); }
+  .stat-value.green  { color:var(--green); }
+  .stat-value.red    { color:var(--red); }
+  .stat-sub { font-size:0.72rem; color:#aaa; margin-top:4px; }
+
+  /* メニューカード */
+  .menu-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-bottom:24px; }
+  .menu-card {
+    background:var(--card); border-radius:14px; padding:18px;
+    box-shadow:var(--shadow); border:2px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .menu-card:hover { border-color:var(--orange); }
+  .menu-card-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .menu-badge {
+    background:var(--orange); color:white;
+    font-size:1rem; font-weight:900;
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .menu-card-name { font-size:0.88rem; font-weight:700; line-height:1.4; }
+  .progress-bar { background:#f0ece4; border-radius:6px; height:10px; overflow:hidden; margin:10px 0; }
+  .progress-fill { height:100%; border-radius:6px; transition:width 0.5s; }
+  .fill-ok  { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+  .fill-low { background: linear-gradient(90deg, #f39c12, #e67e22); }
+  .fill-out { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+  .menu-nums { display:flex; justify-content:space-between; font-size:0.78rem; color:#888; }
+  .menu-nums strong { color:var(--black); }
+
+  /* ログテーブル */
+  .table-wrap { overflow-x:auto; border-radius:12px; box-shadow:var(--shadow); border:1.5px solid var(--border); }
+  table { width:100%; border-collapse:collapse; background:var(--card); }
+  thead tr { background: linear-gradient(135deg, var(--orange), var(--dark-orange)); }
+  thead th { color:white; padding:10px 14px; text-align:left; font-size:0.78rem; font-weight:700; letter-spacing:0.04em; white-space:nowrap; }
+  tbody tr { border-bottom:1px solid #f0ece4; transition:background 0.1s; }
+  tbody tr:hover { background:#fdf6e3; }
+  tbody tr:last-child { border-bottom:none; }
+  td { padding:9px 14px; font-size:0.82rem; }
+  .badge-menu {
+    display:inline-block; padding:2px 9px;
+    border-radius:12px; font-size:0.72rem; font-weight:700;
+    background:#fff3cd; color:#856404; border:1px solid #ffc107;
+  }
+  .badge-a { background:#d4edda; color:#155724; border-color:#28a745; }
+  .badge-b { background:#cce5ff; color:#004085; border-color:#4a90d9; }
+  .badge-c { background:#f8d7da; color:#721c24; border-color:#f56c73; }
+  .badge-d { background:#e2d9f3; color:#432874; border-color:#9b59b6; }
+
+  /* 手動登録フォーム */
+  .form-card { background:var(--card); border-radius:14px; padding:20px; box-shadow:var(--shadow); border:1.5px solid var(--border); max-width:480px; }
+  .form-group { margin-bottom:14px; }
+  .form-label { font-size:0.78rem; font-weight:700; color:#666; margin-bottom:5px; display:block; }
+  .form-input {
+    width:100%; border:2px solid var(--border); border-radius:8px;
+    padding:9px 12px; font-size:0.9rem; background:white; outline:none;
+    transition:border-color 0.2s;
+  }
+  .form-input:focus { border-color:var(--orange); }
+  select.form-input { cursor:pointer; }
+  .btn-submit {
+    width:100%; padding:12px; background:linear-gradient(135deg,var(--orange),var(--dark-orange));
+    color:white; border:none; border-radius:10px; font-size:0.95rem;
+    font-weight:700; cursor:pointer; box-shadow:0 3px 10px rgba(240,165,0,0.35);
+    transition:all 0.15s;
+  }
+  .btn-submit:hover { transform:translateY(-1px); box-shadow:0 5px 15px rgba(240,165,0,0.45); }
+
+  /* アラート */
+  .alert {
+    padding:12px 16px; border-radius:10px; margin:12px 0;
+    font-size:0.85rem; font-weight:600; display:none;
+    animation: fadeIn 0.3s;
+  }
+  .alert.success { background:#d4edda; border:1.5px solid #28a745; color:#155724; }
+  .alert.error   { background:#f8d7da; border:1.5px solid #dc3545; color:#721c24; }
+  .alert.warning { background:#fff3cd; border:1.5px solid #ffc107; color:#856404; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  /* スキャン画面リンク */
+  .scan-link-card {
+    background: linear-gradient(135deg, var(--orange), var(--dark-orange));
+    color:white; border-radius:14px; padding:20px;
+    display:flex; align-items:center; gap:16px; margin-bottom:24px;
+    box-shadow: 0 4px 16px rgba(240,165,0,0.4);
+    text-decoration:none;
+  }
+  .scan-link-icon { font-size:2.5rem; }
+  .scan-link-text h3 { font-size:1rem; font-weight:800; margin-bottom:4px; }
+  .scan-link-text p { font-size:0.78rem; opacity:0.9; }
+
+  /* レスポンシブ */
+  @media (max-width: 768px) {
+    .sidebar { display:none; }
+    .content { padding:14px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap:10px; }
+    .menu-cards { grid-template-columns: 1fr 1fr; gap:10px; }
+    .topbar h1 { font-size:0.95rem; }
+    .page-title { font-size:1.1rem; }
+    .bottom-nav {
+      display:flex !important; position:fixed; bottom:0; left:0; right:0;
+      background:white; border-top:2px solid var(--border); z-index:300;
+      box-shadow:0 -2px 12px rgba(0,0,0,0.1);
+    }
+  }
+  .bottom-nav { display:none; }
+  .bottom-nav-item {
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    padding:8px 4px; cursor:pointer; font-size:0.65rem; font-weight:600; color:#aaa;
+    transition:color 0.15s;
+  }
+  .bottom-nav-item.active { color:var(--orange); }
+  .bottom-nav-item .icon { font-size:1.3rem; margin-bottom:2px; }
+  @media (max-width:768px) { body { padding-bottom:60px; } }
+
+  .loading { text-align:center; padding:40px; color:#aaa; font-size:0.9rem; }
+  .empty { text-align:center; padding:30px; color:#bbb; font-size:0.85rem; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="refresh-btn" onclick="loadAll()" title="更新">↻</button>
+    <h1>🍱 たまルン 管理画面</h1>
+  </div>
+  <div class="topbar-right">
+    <span class="live-dot"></span>
+    <span id="updateTime">読込中...</span>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- PC サイドバー -->
+  <nav class="sidebar">
+    <div class="nav-section">メイン</div>
+    <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard', this)">
+      <span class="nav-icon">📊</span> ダッシュボード
+    </div>
+    <div class="nav-item" data-section="logs" onclick="showSection('logs', this)">
+      <span class="nav-icon">📋</span> 読込ログ
+      <span class="nav-badge" id="sideLogCount">0</span>
+    </div>
+
+    <div class="nav-section">操作</div>
+    <div class="nav-item" data-section="manual" onclick="showSection('manual', this)">
+      <span class="nav-icon">✍️</span> 手動登録
+    </div>
+
+    <div class="nav-section">リンク</div>
+    <div class="nav-item" onclick="window.open('index.html','_blank')">
+      <span class="nav-icon">📷</span> スキャン画面
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="section active" id="sec-dashboard">
+      <div class="page-title">📊 ダッシュボード</div>
+
+      <!-- スキャン画面へのリンク -->
+      <a href="index.html" target="_blank" class="scan-link-card">
+        <div class="scan-link-icon">📷</div>
+        <div class="scan-link-text">
+          <h3>スキャン画面を開く</h3>
+          <p>別タブ・別デバイスでスキャン操作ができます</p>
+        </div>
+        <span style="margin-left:auto;font-size:1.4rem;opacity:0.8">→</span>
+      </a>
+
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card"><div class="stat-label">本日合計</div><div class="stat-value orange" id="totalToday">-</div><div class="stat-sub">受付済み</div></div>
+        <div class="stat-card"><div class="stat-label">残食数合計</div><div class="stat-value green" id="totalRemain">-</div><div class="stat-sub">全メニュー合計</div></div>
+        <div class="stat-card"><div class="stat-label">売切メニュー</div><div class="stat-value red" id="soldOutCount">-</div><div class="stat-sub">種類</div></div>
+        <div class="stat-card"><div class="stat-label">更新時刻</div><div class="stat-value orange" style="font-size:1.3rem" id="updatedAt">-</div><div class="stat-sub">自動30秒更新</div></div>
+      </div>
+
+      <div class="page-title" style="font-size:1rem; margin-bottom:14px;">🍱 メニュー別状況</div>
+      <div class="menu-cards" id="menuCards"><div class="loading">読込中...</div></div>
+    </section>
+
+    <!-- ============ LOGS ============ -->
+    <section class="section" id="sec-logs">
+      <div class="page-title">📋 本日の読込ログ</div>
+      <div id="logAlert" class="alert"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>時刻</th><th>カードID</th><th>定食</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"><tr><td colspan="3" class="loading">読込中...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ MANUAL ============ -->
+    <section class="section" id="sec-manual">
+      <div class="page-title">✍️ 手動登録</div>
+      <div id="manualAlert" class="alert"></div>
+      <div class="form-card">
+        <div class="form-group">
+          <label class="form-label">カードID *</label>
+          <input type="text" class="form-input" id="manualCardId" placeholder="バーコード番号を入力" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label class="form-label">定食 *</label>
+          <select class="form-input" id="manualMenuId">
+            <option value="">選択してください</option>
+            <option value="A">A - 日替わり（限定100食）</option>
+            <option value="B">B - からあげ定食（限定50食）</option>
+            <option value="C">C - ジャンボチキンカツ定食（限定50食）</option>
+            <option value="D">D - カツカレー（限定50食）</option>
+          </select>
+        </div>
+        <button class="btn-submit" onclick="submitManual()">登録する</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- スマホ ボトムナビ -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-item active" onclick="showSection('dashboard', this)">
+    <span class="icon">📊</span>ダッシュボード
+  </div>
+  <div class="bottom-nav-item" onclick="showSection('logs', this)">
+    <span class="icon">📋</span>ログ
+  </div>
+  <div class="bottom-nav-item" onclick="showSection('manual', this)">
+    <span class="icon">✍️</span>手動登録
+  </div>
+</nav>
+
+<script src="config.js"></script>
+<script>
+let currentSection = 'dashboard';
+let autoRefreshTimer = null;
+
+// ============================================================
+// ナビゲーション
+// ============================================================
+function showSection(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+
+  document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  currentSection = name;
+  loadSection(name);
+}
+
+function loadSection(name) {
+  if (name === 'dashboard') loadDashboard();
+  else if (name === 'logs') loadLogs();
+}
+
+// ============================================================
+// データ読込
+// ============================================================
+function loadAll() {
+  loadSection(currentSection);
+}
+
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${GAS_URL}?action=getDashboardData`);
+    const data = await res.json();
+    
+    // Stats
+    const totalRemain = (data.menus || []).reduce((s, m) => s + m.remain, 0);
+    const soldOut     = (data.menus || []).filter(m => m.remain <= 0).length;
+    document.getElementById('totalToday').textContent  = data.totalToday || 0;
+    document.getElementById('totalRemain').textContent = totalRemain;
+    document.getElementById('soldOutCount').textContent = soldOut;
+    document.getElementById('updatedAt').textContent    = data.updatedAt || '-';
+    document.getElementById('updateTime').textContent   = data.updatedAt || '-';
+
+    // Menu cards
+    renderMenuCards(data.menus || []);
+
+    // Log badge
+    document.getElementById('sideLogCount').textContent = data.totalToday || 0;
+  } catch (err) {
+    console.error('Error fetching dashboard data:', err);
+  }
+}
+
+function renderMenuCards(menus) {
+  const container = document.getElementById('menuCards');
+  if (!menus.length) { container.innerHTML = '<div class="empty">データなし</div>'; return; }
+  container.innerHTML = '';
+  menus.forEach(m => {
+    const fillClass = m.pct >= 100 ? 'fill-out' : m.pct >= 80 ? 'fill-low' : 'fill-ok';
+    const badgeClass = 'badge-' + m.id.toLowerCase();
+    container.innerHTML += `
+      <div class="menu-card">
+        <div class="menu-card-header">
+          <div class="menu-badge">${m.id}</div>
+          <div class="menu-card-name">${m.name}</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill ${fillClass}" style="width:${m.pct}%"></div></div>
+        <div class="menu-nums">
+          <span>提供: <strong>${m.current}</strong></span>
+          <span>残: <strong>${m.remain}</strong></span>
+          <span>上限: <strong>${m.limit}</strong></span>
+        </div>
+      </div>
+    `;
+  });
+}
+
+async function loadLogs() {
+  const tbody = document.getElementById('logBody');
+  tbody.innerHTML = '<tr><td colspan="3" class="loading">読込中...</td></tr>';
+  
+  try {
+    const res = await fetch(`${GAS_URL}?action=getTodayLog`);
+    const data = await res.json();
+    
+    if (!data.success || !data.records.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">本日のデータなし</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.records.forEach((r, i) => {
+      const menuId = (r.menu || '').split(':')[0];
+      const badgeClass = 'badge-' + menuId.toLowerCase();
+      tbody.innerHTML += `
+        <tr>
+          <td>${r.timestamp}</td>
+          <td style="font-family:monospace;font-size:0.8rem">${r.cardId}</td>
+          <td><span class="badge-menu ${badgeClass}">${r.menu}</span></td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    console.error('Error fetching logs:', err);
+    tbody.innerHTML = '<tr><td colspan="3" class="error">エラーが発生しました</td></tr>';
+  }
+}
+
+// ============================================================
+// 手動登録
+// ============================================================
+async function submitManual() {
+  const cardId   = document.getElementById('manualCardId').value.trim();
+  const menuId   = document.getElementById('manualMenuId').value;
+
+  if (!cardId)  { showAlert('manualAlert', 'error', 'カードIDを入力してください'); return; }
+  if (!menuId)  { showAlert('manualAlert', 'error', '定食を選択してください'); return; }
+
+  showAlert('manualAlert', 'warning', '処理中...');
+  
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ cardId, menuId })
+    });
+    
+    // Check if the response actually contains a valid json body (handle redirects gracefully if standard fetch handles it)
+    const data = await res.json();
+    if (data.success) {
+      showAlert('manualAlert', 'success', `✅ ${data.message}`);
+      document.getElementById('manualCardId').value = '';
+    } else if (data.code === 'DUPLICATE') {
+      showAlert('manualAlert', 'warning', `⚠️ ${data.message}`);
+    } else {
+      showAlert('manualAlert', 'error', `❌ ${data.message}`);
+    }
+    loadDashboard();
+  } catch (err) {
+    showAlert('manualAlert', 'error', 'エラー: ' + err.message);
+  }
+}
+
+// ============================================================
+// ユーティリティ
+// ============================================================
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'alert ' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { if (el) el.style.display = 'none'; }, 4000);
+}
+
+function showAlertGlobal(type, msg) {
+  const banner = document.createElement('div');
+  banner.className = 'alert ' + type;
+  banner.textContent = msg;
+  banner.style.cssText = 'position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:999;min-width:280px;text-align:center;display:block;';
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 3000);
+}
+
+// 初期読込 & 自動更新
+loadDashboard();
+autoRefreshTimer = setInterval(() => {
+  if (currentSection === 'dashboard') loadDashboard();
+}, 30000);
+
+setInterval(() => {
+  const now = new Date().toLocaleTimeString('ja-JP');
+  const el = document.getElementById('updateTime');
+}, 1000);
+</script>
+</body>
+</html>

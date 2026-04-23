@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>たまルン スキャン</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root {
+    --orange: #f0a500;
+    --dark-orange: #d4910a;
+    --black: #1a1a1a;
+    --white: #ffffff;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --yellow: #f39c12;
+    --bg: #fdf6e3;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: linear-gradient(135deg, var(--orange), var(--dark-orange));
+    color: white;
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(240,165,0,0.4);
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.05em; }
+  header .subtitle { font-size: 0.72rem; opacity: 0.9; margin-top: 2px; }
+
+  .main { flex:1; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* メニュー選択 */
+  .section-title {
+    font-size: 0.78rem; font-weight: 700;
+    color: var(--dark-orange); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 6px;
+  }
+  .menu-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .menu-btn {
+    background: var(--card-bg);
+    border: 2.5px solid #e8e0d0;
+    border-radius: 12px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .menu-btn.selected {
+    border-color: var(--orange);
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    box-shadow: 0 0 0 3px rgba(240,165,0,0.25);
+  }
+  .menu-btn:active { transform: scale(0.97); }
+  .menu-badge {
+    display: inline-block;
+    background: var(--orange); color: white;
+    font-size: 0.75rem; font-weight: 800;
+    width: 22px; height: 22px; border-radius: 50%;
+    line-height: 22px; margin-bottom: 4px;
+  }
+  .menu-name { font-size: 0.72rem; font-weight: 600; color: var(--black); line-height: 1.3; }
+  .menu-limit { font-size: 0.65rem; color: #999; margin-top: 2px; }
+  .menu-remain { font-size: 0.68rem; font-weight: 700; }
+  .menu-remain.ok { color: var(--green); }
+  .menu-remain.low { color: var(--yellow); }
+  .menu-remain.out { color: var(--red); }
+  .menu-btn.sold-out { opacity: 0.5; pointer-events: none; }
+
+  /* スキャナー */
+  .scanner-area {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    border: 2px solid #e8e0d0;
+  }
+  #reader {
+    width: 100%; border-radius: 10px; overflow: hidden;
+    background: #111;
+  }
+  #reader video { border-radius: 10px; }
+
+  .scan-controls { display: flex; gap: 8px; margin-top: 10px; }
+  .btn {
+    flex:1; padding: 12px; border-radius: 10px;
+    border: none; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--orange), var(--dark-orange));
+    color: white; box-shadow: 0 3px 10px rgba(240,165,0,0.4);
+  }
+  .btn-secondary { background: #f0f0f0; color: #555; }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; pointer-events: none; }
+
+  /* 手動入力 */
+  .manual-input { display: flex; gap: 6px; margin-top: 10px; }
+  .manual-input input {
+    flex:1; border: 2px solid #ddd; border-radius: 8px;
+    padding: 10px 12px; font-size: 0.9rem; background: white; outline: none;
+  }
+  .manual-input input:focus { border-color: var(--orange); }
+  .btn-manual {
+    padding: 10px 14px; background: #555; color: white;
+    border: none; border-radius: 8px; font-size: 0.82rem;
+    font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+
+  /* 結果表示 */
+  #result {
+    border-radius: 14px; padding: 16px;
+    display: none; animation: fadeIn 0.3s ease;
+  }
+  #result.success { background: linear-gradient(135deg, #d4edda, #c3e6cb); border: 2px solid #28a745; }
+  #result.error   { background: linear-gradient(135deg, #f8d7da, #f5c6cb); border: 2px solid #dc3545; }
+  #result.warning { background: linear-gradient(135deg, #fff3cd, #ffeeba); border: 2px solid #ffc107; }
+  .result-icon { font-size: 2.2rem; text-align: center; margin-bottom: 8px; }
+  .result-title { font-size: 1.05rem; font-weight: 800; text-align: center; margin-bottom: 8px; }
+  .result-detail { font-size: 0.82rem; line-height: 1.6; }
+  .result-card-id { font-family: monospace; font-size: 0.78rem; background: rgba(0,0,0,0.08); padding: 4px 8px; border-radius: 6px; margin-top: 6px; display: inline-block; }
+
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  /* 接続状態 */
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; background: #f5f0e8; border-radius: 8px;
+    font-size: 0.72rem; color: #888;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 4px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  footer {
+    text-align: center; padding: 10px;
+    font-size: 0.68rem; color: #aaa;
+  }
+  .admin-link {
+    display: block; text-align: center;
+    font-size: 0.75rem; color: var(--dark-orange); margin-top: 4px;
+    text-decoration: none; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🍱 たまルン スキャン</h1>
+  <div class="subtitle">両備定食 受付システム</div>
+</header>
+
+<div class="main">
+  <!-- ステータス -->
+  <div class="status-bar">
+    <span><span class="dot"></span>オンライン</span>
+    <span id="statusTime">読込中...</span>
+  </div>
+
+  <!-- 定食選択 -->
+  <div>
+    <div class="section-title">① 定食を選択</div>
+    <div class="menu-grid" id="menuGrid">
+      <!-- JSで生成 -->
+    </div>
+  </div>
+
+  <!-- スキャナー -->
+  <div>
+    <div class="section-title">② バーコードをスキャン</div>
+    <div class="scanner-area">
+      <div id="reader"></div>
+      <div class="scan-controls">
+        <button class="btn btn-primary" id="startBtn" onclick="startScan()">📷 スキャン開始</button>
+        <button class="btn btn-secondary" id="stopBtn" onclick="stopScan()" style="display:none">⏹ 停止</button>
+      </div>
+      <div class="manual-input">
+        <input type="text" id="manualCardId" placeholder="手動入力：カードID" inputmode="numeric">
+        <button class="btn-manual" onclick="manualScan()">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div id="result"></div>
+
+</div>
+
+<footer>
+  <a href="admin.html" class="admin-link">📊 管理画面を開く</a>
+  たまルンカードシステム &copy; 2024
+</footer>
+
+<script src="config.js"></script>
+<script>
+let html5QrcodeScanner = null;
+let scanning = false;
+let selectedMenu = null;
+let menuData = {};
+let processing = false;
+
+// 時刻更新
+setInterval(() => {
+  document.getElementById('statusTime').textContent =
+    new Date().toLocaleTimeString('ja-JP');
+}, 1000);
+
+// メニュー描画
+function renderMenus(menus) {
+  const grid = document.getElementById('menuGrid');
+  grid.innerHTML = '';
+  menus.forEach(m => {
+    const pct    = m.pct || 0;
+    const remain = m.remain || 0;
+    const isSoldOut = remain <= 0;
+    const remainClass = remain <= 0 ? 'out' : remain <= 5 ? 'low' : 'ok';
+    const remainText  = remain <= 0 ? '売切' : `残${remain}食`;
+    menuData[m.id] = m;
+
+    const btn = document.createElement('div');
+    btn.className = 'menu-btn' + (isSoldOut ? ' sold-out' : '') + (selectedMenu === m.id ? ' selected' : '');
+    btn.id = 'menu-' + m.id;
+    btn.innerHTML = `
+      <div class="menu-badge">${m.id}</div>
+      <div class="menu-name">${m.name.replace('両備','').replace('定食','定食')}</div>
+      <div class="menu-limit">上限 ${m.limit}食</div>
+      <div class="menu-remain ${remainClass}">${remainText}</div>
+    `;
+    btn.onclick = () => selectMenu(m.id);
+    grid.appendChild(btn);
+  });
+}
+
+function selectMenu(id) {
+  selectedMenu = id;
+  document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('selected'));
+  const el = document.getElementById('menu-' + id);
+  if (el) el.classList.add('selected');
+}
+
+// メニュー状況の定期更新
+async function loadMenuStatus() {
+  try {
+    const res = await fetch(`${GAS_URL}?action=getMenuStatus`);
+    const data = await res.json();
+    if (data.success) renderMenus(data.menus);
+  } catch (err) {
+    console.error('Error loading menu status:', err);
+  }
+}
+loadMenuStatus();
+setInterval(loadMenuStatus, 30000);
+
+// スキャン開始
+function startScan() {
+  if (scanning) return;
+  scanning = true;
+  document.getElementById('startBtn').style.display = 'none';
+  document.getElementById('stopBtn').style.display  = 'block';
+  clearResult();
+
+  html5QrcodeScanner = new Html5Qrcode('reader');
+  html5QrcodeScanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 240, height: 120 }, formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.QR_CODE] },
+    onScanSuccess,
+    () => {}
+  ).catch(err => {
+    showResult('error', '⚠️ カメラ', 'カメラを起動できません。手動入力をご利用ください。', '');
+    stopScan();
+  });
+}
+
+function stopScan() {
+  scanning = false;
+  document.getElementById('startBtn').style.display = 'block';
+  document.getElementById('stopBtn').style.display  = 'none';
+  if (html5QrcodeScanner) {
+    html5QrcodeScanner.stop().catch(() => {});
+    html5QrcodeScanner = null;
+  }
+}
+
+function onScanSuccess(decodedText) {
+  if (processing) return;
+  stopScan();
+  processCard(decodedText);
+}
+
+function manualScan() {
+  const val = document.getElementById('manualCardId').value.trim();
+  if (!val) { alert('カードIDを入力してください'); return; }
+  document.getElementById('manualCardId').value = '';
+  processCard(val);
+}
+
+async function processCard(cardId) {
+  if (processing) return;
+  if (!selectedMenu) {
+    showResult('error', '⚠️ 定食未選択', '先に定食を選択してください。', cardId);
+    return;
+  }
+  processing = true;
+  showResult('warning', '⏳ 処理中...', 'スプレッドシートに記録しています...', cardId);
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ cardId, menuId: selectedMenu }) // sending as text/plain via implicit content-type avoids CORS options check in most cases if handled properly by GAS
+    });
+    
+    // GAS fetch handling for POST
+    const data = await res.json();
+    processing = false;
+    loadMenuStatus();
+    
+    if (data.success) {
+      showResult('success', '✅ 受付完了', `${data.menuName}\n${data.currentCount}/${data.limit}食 受付済み`, cardId);
+      vibrate([200]);
+    } else if (data.code === 'DUPLICATE') {
+      showResult('warning', '⚠️ 重複読込', data.message, cardId);
+      vibrate([100, 50, 100]);
+    } else if (data.code === 'SOLD_OUT') {
+      showResult('error', '🚫 売り切れ', data.message, cardId);
+      vibrate([500]);
+    } else {
+      showResult('error', '❌ エラー', data.message, cardId);
+      vibrate([300]);
+    }
+  } catch (err) {
+    processing = false;
+    showResult('error', '❌ 通信エラー', err.message || '不明なエラー', cardId);
+  }
+}
+
+function showResult(type, title, detail, cardId) {
+  const el = document.getElementById('result');
+  el.className = type;
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="result-title">${title}</div>
+    <div class="result-detail">${detail.replace(/\n/g, '<br>')}</div>
+    ${cardId ? `<div class="result-card-id">CardID: ${cardId}</div>` : ''}
+  `;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function clearResult() {
+  const el = document.getElementById('result');
+  el.style.display = 'none';
+}
+
+function vibrate(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+</script>
+</body>
+</html>
