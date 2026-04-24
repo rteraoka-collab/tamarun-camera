@@ -1,1 +1,0 @@
-# tamarun-camera
