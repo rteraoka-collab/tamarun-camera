@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#614000",
+                        "background": "#f9f9f6",
+                        "outline-variant": "#d6c4ac",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e2e3e0",
+                        "secondary-fixed": "#ffddb0",
+                        "on-primary-fixed": "#281800",
+                        "on-primary-container": "#5f3f00",
+                        "primary-fixed": "#ffddaf",
+                        "primary": "#805600",
+                        "tertiary-container": "#aeb5b7",
+                        "on-tertiary-fixed-variant": "#41484a",
+                        "secondary-container": "#ffb639",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#404749",
+                        "primary-fixed-dim": "#ffba44",
+                        "tertiary": "#586062",
+                        "tertiary-fixed": "#dde4e6",
+                        "on-primary-fixed-variant": "#614000",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#6e4900",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#291800",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f4f4f1",
+                        "outline": "#847561",
+                        "surface-dim": "#dadad7",
+                        "secondary-fixed-dim": "#ffba48",
+                        "surface": "#f9f9f6",
+                        "surface-container": "#eeeeeb",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#514533",
+                        "inverse-on-surface": "#f1f1ee",
+                        "surface-container-high": "#e8e8e5",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#161d1f",
+                        "primary-container": "#f0a500",
+                        "surface-tint": "#805600",
+                        "tertiary-fixed-dim": "#c1c8ca",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9f6",
+                        "surface-variant": "#e2e3e0",
+                        "secondary": "#805600",
+                        "inverse-primary": "#ffba44",
+                        "on-surface": "#1a1c1b",
+                        "inverse-surface": "#2f312f",
+                        "on-background": "#1a1c1b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "container_margin": "20px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "title-sm": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-mesh {
+            background-color: #f9f9f6;
+            background-image: radial-gradient(at 0% 0%, rgba(240, 165, 0, 0.1) 0, transparent 50%),
+                              radial-gradient(at 100% 100%, rgba(240, 165, 0, 0.05) 0, transparent 50%);
+        }
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-mesh font-body-md text-on-background min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-500" data-icon="restaurant">restaurant</span>
+<h1 class="font-plus-jakarta-sans font-bold text-lg text-amber-600 tracking-tight">タマルン食堂</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-amber-50 transition-all duration-300">
+<span class="material-symbols-outlined text-slate-500" data-icon="notifications">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full border-2 border-amber-500 overflow-hidden">
+<img alt="ユーザープロフィール写真" data-alt="Close-up professional headshot of a smiling administrator in a modern office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACOCJVgykDxMtHuzwFQ5PEzxjrZVnDovpbEXKHds0D5Zi15kKbAG59iHzsaaTxBubVcDUSdFj2Wi9SZA6S-FV0zgxChSMEpXUkmu2TF40Ws2Bve3ZVJTFEUILQ_kvtCNkLTgJ9Y7iJhYtkuBsI_J6Yegptbp7hhF3lyXNNhdQkmytqpcBkQGXv447Kmm6cIjPseJm2YUA9g76gAnFY677kXFroLKRldtw_gDOwRR8-TSEsgGQW5eF7C6mStF82TWC6E5Gl-ztVy3U"/>
+</div>
+</div>
+</header>
+<main class="pt-20 px-container_margin">
+<!-- Dashboard Welcome Section -->
+<section class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface">管理者ポータル</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">おかえりなさい、総責任者様</p>
+</section>
+<!-- KPI Cards Carousel-style Grid -->
+<section class="mb-xl">
+<div class="flex gap-md overflow-x-auto pb-4 -mx-container_margin px-container_margin scrollbar-hide snap-x">
+<div class="snap-start min-w-[240px] glass-card p-md rounded-xl">
+<div class="flex justify-between items-start mb-sm">
+<div class="p-2 bg-amber-100 rounded-lg">
+<span class="material-symbols-outlined text-amber-600" data-icon="payments">payments</span>
+</div>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12.5%</span>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">本日の売上</p>
+<p class="font-display-lg text-headline-md text-on-surface mt-xs">¥428,500</p>
+</div>
+<div class="snap-start min-w-[240px] glass-card p-md rounded-xl">
+<div class="flex justify-between items-start mb-sm">
+<div class="p-2 bg-amber-100 rounded-lg">
+<span class="material-symbols-outlined text-amber-600" data-icon="group">group</span>
+</div>
+<span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">混雑中</span>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">現在来店数</p>
+<p class="font-display-lg text-headline-md text-on-surface mt-xs">1,240 名</p>
+</div>
+<div class="snap-start min-w-[240px] glass-card p-md rounded-xl">
+<div class="flex justify-between items-start mb-sm">
+<div class="p-2 bg-amber-100 rounded-lg">
+<span class="material-symbols-outlined text-amber-600" data-icon="inventory_2">inventory_2</span>
+</div>
+<span class="text-xs font-bold text-error bg-error-container px-2 py-1 rounded-full">不足</span>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">在庫アラート</p>
+<p class="font-display-lg text-headline-md text-on-surface mt-xs">14 品目</p>
+</div>
+</div>
+</section>
+<!-- Menu Progress Section -->
+<section class="mb-xl">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-title-sm text-title-sm text-on-surface">本日のおすすめメニュー消化率</h3>
+<span class="material-symbols-outlined text-amber-600" data-icon="more_horiz">more_horiz</span>
+</div>
+<div class="glass-card rounded-2xl p-md flex flex-col gap-lg">
+<!-- Item 1 -->
+<div class="space-y-sm">
+<div class="flex justify-between font-body-sm text-on-surface-variant">
+<span>豚とんかつ定食</span>
+<span class="font-bold text-on-surface">182/200</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-amber-500 rounded-full" style="width: 91%"></div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="space-y-sm">
+<div class="flex justify-between font-body-sm text-on-surface-variant">
+<span>野菜カレー</span>
+<span class="font-bold text-on-surface">45/150</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-amber-500 rounded-full opacity-60" style="width: 30%"></div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="space-y-sm">
+<div class="flex justify-between font-body-sm text-on-surface-variant">
+<span>サーモン丼</span>
+<span class="font-bold text-on-surface">112/120</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 93%"></div>
+</div>
+</div>
+<button class="w-full py-md bg-amber-50 rounded-xl text-amber-600 font-bold font-title-sm transition-all duration-300 hover:bg-amber-100 active:scale-95">
+                    すべての在庫を確認
+                </button>
+</div>
+</section>
+<!-- Recent Log Snippets -->
+<section class="mb-xl">
+<h3 class="font-title-sm text-title-sm text-on-surface mb-md">システムログ</h3>
+<div class="flex flex-col gap-sm">
+<!-- Log Entry 1 -->
+<div class="flex items-start gap-md p-md glass-card rounded-xl">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500 text-sm" data-icon="sync">sync</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<span class="font-bold text-body-sm text-on-surface">在庫更新</span>
+<span class="text-[10px] text-slate-400">10:45 AM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant leading-tight">「特選米」の在庫が +50kg 調整されました。</p>
+</div>
+</div>
+<!-- Log Entry 2 -->
+<div class="flex items-start gap-md p-md glass-card rounded-xl">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-amber-600 text-sm" data-icon="badge">badge</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<span class="font-bold text-body-sm text-on-surface">スタッフ出勤</span>
+<span class="text-[10px] text-slate-400">08:00 AM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant leading-tight">厨房主任「田中」がシフトを開始しました。</p>
+</div>
+</div>
+<!-- Log Entry 3 -->
+<div class="flex items-start gap-md p-md glass-card rounded-xl">
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-red-500 text-sm" data-icon="report_problem">report_problem</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<span class="font-bold text-body-sm text-on-surface text-red-600">端末エラー</span>
+<span class="text-[10px] text-slate-400">07:22 AM</span>
+</div>
+<p class="text-body-sm text-on-surface-variant leading-tight">POSレジ #04 の接続に失敗しました。再試行中...</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl rounded-t-2xl border-t border-white/20 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+<!-- Menu -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 transition-transform duration-200 active:scale-90 hover:text-amber-500" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="font-plus-jakarta-sans text-[10px] font-semibold uppercase tracking-wider">メニュー</span>
+</a>
+<!-- Scan -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 transition-transform duration-200 active:scale-90 hover:text-amber-500" href="#">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+<span class="font-plus-jakarta-sans text-[10px] font-semibold uppercase tracking-wider">バーコード</span>
+</a>
+<!-- Wallet -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 transition-transform duration-200 active:scale-90 hover:text-amber-500" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-plus-jakarta-sans text-[10px] font-semibold uppercase tracking-wider">お財布</span>
+</a>
+<!-- Admin (Active) -->
+<a class="flex flex-col items-center justify-center text-amber-600 dark:text-amber-400 scale-110 transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-plus-jakarta-sans text-[10px] font-semibold uppercase tracking-wider">管理</span>
+</a>
+</nav>
+</body></html>
